@@ -24,6 +24,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Inject lab-only error
+        if: github.event_name == 'merge_group'
+        run: exit 1
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
       - run: node scripts/ci-scope-gate.mjs --self-test
 
