@@ -30,6 +30,9 @@ jobs:
   rls-test-pairing:
     runs-on: ubuntu-latest
     steps:
+      - name: Inject lab-only error
+        if: github.event_name == 'merge_group'
+        run: exit 1
       - run: node -e "process.exit(0)"
 
   test-write-protection:
