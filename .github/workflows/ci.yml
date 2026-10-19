@@ -48,6 +48,7 @@ jobs:
       - run: node -e "process.exit(0)"
 
   pull-request-scope-gate:
+    name: ${{ github.event_name == 'merge_group' && 'demo-absent-gate' || 'pull-request-scope-gate' }}
     needs:
       - changes
       - repository-boundary
