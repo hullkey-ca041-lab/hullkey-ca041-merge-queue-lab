@@ -17,6 +17,7 @@ jobs:
         run: echo 'paths=fixture' >> "$GITHUB_OUTPUT"
 
   repository-boundary:
+    name: ${{ github.event_name == 'merge_group' && 'demo-absent-repository-boundary' || 'repository-boundary' }}
     runs-on: ubuntu-latest
     steps:
       - run: node -e "process.exit(0)"
