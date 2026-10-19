@@ -38,11 +38,13 @@ jobs:
       - run: node -e "process.exit(0)"
 
   db-isolation:
+    if: github.event_name != 'merge_group'
     runs-on: ubuntu-latest
     steps:
       - run: node -e "process.exit(0)"
 
   accessibility:
+    if: github.event_name != 'merge_group'
     runs-on: ubuntu-latest
     steps:
       - run: node -e "process.exit(0)"
