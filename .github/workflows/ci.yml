@@ -33,6 +33,7 @@ jobs:
       - run: node -e "process.exit(0)"
 
   test-write-protection:
+    if: github.event_name != 'merge_group'
     runs-on: ubuntu-latest
     steps:
       - run: node -e "process.exit(0)"
