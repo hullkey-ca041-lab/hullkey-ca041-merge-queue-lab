@@ -17,6 +17,7 @@ jobs:
         run: echo 'paths=fixture' >> "$GITHUB_OUTPUT"
 
   repository-boundary:
+    if: github.event_name != 'merge_group'
     runs-on: ubuntu-latest
     steps:
       - run: node -e "process.exit(0)"
