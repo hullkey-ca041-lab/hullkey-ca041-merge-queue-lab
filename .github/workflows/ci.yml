@@ -28,6 +28,7 @@ jobs:
       - run: node scripts/ci-scope-gate.mjs --self-test
 
   rls-test-pairing:
+    name: ${{ github.event_name == 'merge_group' && 'demo-absent-rls-test-pairing' || 'rls-test-pairing' }}
     runs-on: ubuntu-latest
     steps:
       - run: node -e "process.exit(0)"
