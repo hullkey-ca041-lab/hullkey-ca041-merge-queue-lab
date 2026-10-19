@@ -1,0 +1,77 @@
+name: CA-041 isolated checks
+
+on:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      paths: ${{ steps.changed.outputs.paths }}
+    steps:
+      - id: changed
+        run: echo 'paths=fixture' >> "$GITHUB_OUTPUT"
+
+  repository-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - run: test -f README.md
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - run: node scripts/ci-scope-gate.mjs --self-test
+
+  rls-test-pairing:
+    runs-on: ubuntu-latest
+    steps:
+      - run: test -f scripts/ci-scope-gate.mjs
+
+  test-write-protection:
+    runs-on: ubuntu-latest
+    steps:
+      - run: test -f .github/workflows/ci.yml
+
+  db-isolation:
+    runs-on: ubuntu-latest
+    steps:
+      - run: test -f .github/records-lane.json
+
+  accessibility:
+    runs-on: ubuntu-latest
+    steps:
+      - run: test -f README.md
+
+  pull-request-scope-gate:
+    needs:
+      - changes
+      - repository-boundary
+      - build
+      - db-isolation
+      - rls-test-pairing
+      - test-write-protection
+      - accessibility
+    if: always() && (github.event_name == 'pull_request' || github.event_name == 'merge_group')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+          fetch-depth: 0
+      - name: Evaluate exact base and head
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+          CI_STATUS_CHANGES: ${{ needs.changes.result }}
+          CI_STATUS_REPOSITORY_BOUNDARY: ${{ needs.repository-boundary.result }}
+          CI_STATUS_BUILD: ${{ needs.build.result }}
+          CI_STATUS_DB_ISOLATION: ${{ needs.db-isolation.result }}
+          CI_STATUS_RLS_TEST_PAIRING: ${{ needs.rls-test-pairing.result }}
+          CI_STATUS_TEST_WRITE_PROTECTION: ${{ needs.test-write-protection.result }}
+          CI_STATUS_ACCESSIBILITY: ${{ needs.accessibility.result }}
+        run: node scripts/ci-scope-gate.mjs --evaluate "$BASE_SHA" "$HEAD_SHA"
