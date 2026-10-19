@@ -75,3 +75,7 @@ jobs:
           CI_STATUS_TEST_WRITE_PROTECTION: ${{ needs.test-write-protection.result }}
           CI_STATUS_ACCESSIBILITY: ${{ needs.accessibility.result }}
         run: node scripts/ci-scope-gate.mjs --evaluate "$BASE_SHA" "$HEAD_SHA"
+      - name: Inject lab-only error
+        if: github.event_name == 'merge_group'
+        run: exit 1
+
