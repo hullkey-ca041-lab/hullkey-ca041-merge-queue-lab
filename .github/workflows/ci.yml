@@ -37,7 +37,8 @@ jobs:
     steps:
       - run: node -e "process.exit(0)"
 
-  db-isolation:
+  lab-db-isolation-carrier:
+    name: ${{ github.event_name == 'merge_group' && 'demo-absent-db-isolation' || 'db-isolation' }}
     runs-on: ubuntu-latest
     steps:
       - run: node -e "process.exit(0)"
@@ -52,7 +53,7 @@ jobs:
       - changes
       - repository-boundary
       - build
-      - db-isolation
+      - lab-db-isolation-carrier
       - rls-test-pairing
       - test-write-protection
       - accessibility
@@ -70,7 +71,7 @@ jobs:
           CI_STATUS_CHANGES: ${{ needs.changes.result }}
           CI_STATUS_REPOSITORY_BOUNDARY: ${{ needs.repository-boundary.result }}
           CI_STATUS_BUILD: ${{ needs.build.result }}
-          CI_STATUS_DB_ISOLATION: ${{ needs.db-isolation.result }}
+          CI_STATUS_DB_ISOLATION: ${{ github.event_name != 'merge_group' && needs.lab-db-isolation-carrier.result || '' }}
           CI_STATUS_RLS_TEST_PAIRING: ${{ needs.rls-test-pairing.result }}
           CI_STATUS_TEST_WRITE_PROTECTION: ${{ needs.test-write-protection.result }}
           CI_STATUS_ACCESSIBILITY: ${{ needs.accessibility.result }}
