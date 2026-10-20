@@ -42,7 +42,8 @@ jobs:
     steps:
       - run: node -e "process.exit(0)"
 
-  accessibility:
+  lab-accessibility-carrier:
+    name: ${{ github.event_name == 'merge_group' && 'demo-absent-accessibility' || 'accessibility' }}
     runs-on: ubuntu-latest
     steps:
       - run: node -e "process.exit(0)"
@@ -55,7 +56,7 @@ jobs:
       - db-isolation
       - rls-test-pairing
       - test-write-protection
-      - accessibility
+      - lab-accessibility-carrier
     if: always() && (github.event_name == 'pull_request' || github.event_name == 'merge_group')
     runs-on: ubuntu-latest
     steps:
@@ -73,5 +74,5 @@ jobs:
           CI_STATUS_DB_ISOLATION: ${{ needs.db-isolation.result }}
           CI_STATUS_RLS_TEST_PAIRING: ${{ needs.rls-test-pairing.result }}
           CI_STATUS_TEST_WRITE_PROTECTION: ${{ needs.test-write-protection.result }}
-          CI_STATUS_ACCESSIBILITY: ${{ needs.accessibility.result }}
+          CI_STATUS_ACCESSIBILITY: ${{ github.event_name != 'merge_group' && needs.lab-accessibility-carrier.result || '' }}
         run: node scripts/ci-scope-gate.mjs --evaluate "$BASE_SHA" "$HEAD_SHA"
